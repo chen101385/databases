@@ -1,10 +1,13 @@
-DROP DATABASE IF EXISTS chat
+DROP DATABASE IF EXISTS chat;
 
 CREATE DATABASE chat;
 
 USE chat;
 
-CREATE TABLE messages (
+
+
+/* Create other tables and define schemas for them here! 
+
   /* Describe your table here.
   Table 1: USERS
   Column 1: Users
@@ -25,43 +28,36 @@ CREATE TABLE messages (
   Table 5: ROOMS_MESSAGES
   Column 1: Room ID
   Column 2: Message ID
-  */
-);
-
-/* Create other tables and define schemas for them here! 
+mysql -u root < server/schema.sql
 
 CREATE TABLE table_name (
     column1 datatype,
     column2 datatype,
     column3 datatype,
    ....
-);*/
+);
+*/
+CREATE TABLE Messages (
+ MessageID int NOT NULL AUTO_INCREMENT,
+ Message varchar(200) NOT NULL,
+ UserID int NOT NULL,
+ PRIMARY KEY (MessageID),
+ FOREIGN KEY (UserID) REFERENCES Users(UserID)
+);
 
 CREATE TABLE Users (
-  username varchar(255),
-  userID int
-)
-
-CREATE TABLE Messages (
-  message varchar(255),
-  messageID int
-)
+  UserID int NOT NULL AUTO_INCREMENT,
+  USERNAME varchar(40) NOT NULL,
+  PRIMARY KEY (UserID)
+);
 
 CREATE TABLE Rooms (
-  room varchar(255),
-  roomID int
-)
-CREATE TABLE Users_Messages (
-  userID int,
-  messageID int
-)
-
-CREATE TABLE Rooms_Messages (
-  roomID int,
-  messageID int
-)
-
-
+  RoomID int NOT NULL AUTO_INCREMENT,
+  Room varchar(20) NOT NULL,
+  MessageID int NOT NULL,
+  PRIMARY KEY (RoomID),
+  FOREIGN KEY (MessageID) REFERENCES Messages(MessageID)
+);
 
 /*  Execute this file from the command line by typing:
  *    mysql -u root < server/schema.sql
