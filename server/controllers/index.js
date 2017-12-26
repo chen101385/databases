@@ -9,7 +9,9 @@ module.exports = {
     get: function (req, res) {
 
       //Sequelize - findAll
-      Message.findAll()
+        //include is, by default, an (left) outer join
+          //in ORM: join = inner-join
+      Message.findAll({ include: [user] })
         .complete(function(err, results) {
           res.json(results);
         });
@@ -24,27 +26,47 @@ module.exports = {
     post: function (req, res) {
       //must provide parameters (param); mySQL adapter requires params to be an array
       //in controller, our data for a post request comes from the body, in key-value pairs;
-      var params = [ req.body[text], req.body[username], req.body[roomname] ] 
-      models.messages.post(params, function(err, results) {
-        res.json(results);
-      });
-    } // a function which handles posting a message to the database
+
+
+      //User.findOrCreate - find a user or, if doesn't exist, create one
+      User.findOrCreate({username: req.body[username]});
+        .complete(function(err, user) {
+          let params = {
+            text: req.body[text],
+            //need to convert username --> userID 
+            //DELETED - username: req.body[username]
+            userid: user.id,
+            roomname: req.body[roomname]
+          };
+          //interact directly with ORM Message object
+          Message.create(params)
+            //invoke a .complete callback when ORM is FINISHED
+            .complete(function (err, results) {
+              //EXPRESS - res.sendStatus(statusCode) - sets response HTTP status code & sends string representation as response body. 
+              res.sendStatus(201);
+            });
+        });
+      } 
+    // a function which handles posting a message to the database
   },
 
   users: {
     // Ditto as above
     get: function (req, res) {
-      models.users.get(function(err, results) {
-        //TODO: error;
-        res.json(results);
-      });
+      //nothing to include in parens, since only interacting with users
+      User.findAll()
+        .complete(function (err, results) {
+          res.json(results);
+        });
     },
     post: function (req, res) {
-      var params = [req.body[username]]
-      models.users.post(params, function (err, results) {
-        res.json(results);
-      });
-
+      //post request - only creating (not finding)
+      User.create({ username: req.body[username] });
+          //invoke a .complete callback when ORM is FINISHED
+          .complete(function(err, results) {
+            //EXPRESS - res.sendStatus(statusCode) - sets response HTTP status code & sends string representation as response body. 
+            res.sendStatus(201);
+          });
     }
   }
 };
